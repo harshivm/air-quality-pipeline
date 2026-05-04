@@ -37,7 +37,7 @@ This implementation now includes the full architecture:
 1. Copy environment file:
    - PowerShell: Copy-Item .env.example .env
 2. Start infrastructure and app:
-   - docker compose up -d db kafka kafka-init airflow app
+   - docker compose up -d db kafka kafka-init airflow app OR docker compose up -d --build
 3. Trigger Airflow DAG (Kafka -> Parquet -> Spark -> Star Schema):
    - docker compose exec airflow airflow dags trigger openaq_etl_pipeline
 4. Optionally watch DAG/task status:
