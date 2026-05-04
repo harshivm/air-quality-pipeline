@@ -1,0 +1,268 @@
+:root {
+  --bg: #f3f4ee;
+  --panel: #fffdf8;
+  --ink: #1f2a2a;
+  --muted: #5f6660;
+  --brand: #0e7c66;
+  --accent: #d78a2b;
+  --line: #d9ddd2;
+  --shadow: 0 14px 35px rgba(31, 42, 42, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 10% 20%, #f9f4df 0%, transparent 34%),
+    radial-gradient(circle at 82% 18%, #d6ece6 0%, transparent 38%),
+    var(--bg);
+  min-height: 100vh;
+}
+
+.bg-shape {
+  position: fixed;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(10px);
+}
+
+.bg-a {
+  width: 260px;
+  height: 260px;
+  background: rgba(14, 124, 102, 0.12);
+  top: -60px;
+  right: -40px;
+}
+
+.bg-b {
+  width: 320px;
+  height: 320px;
+  background: rgba(215, 138, 43, 0.12);
+  bottom: -90px;
+  left: -60px;
+}
+
+.hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 20px 20px;
+  animation: fade-in 0.6s ease-out;
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--brand);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.4px;
+}
+
+.hero h1 {
+  margin: 10px 0;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1.05;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  max-width: 720px;
+}
+
+.layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 20px 50px;
+  display: grid;
+  gap: 16px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+  animation: rise 0.5s ease-out;
+}
+
+.controls h2,
+.panel h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+input,
+select,
+button {
+  font: inherit;
+  border-radius: 10px;
+  border: 1px solid #c7cfc1;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+button.ghost {
+  background: #f0f3ea;
+  color: #1f2a2a;
+}
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.kpi p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.kpi h3 {
+  margin: 8px 0 0;
+  font-size: 32px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bars {
+  display: grid;
+  gap: 10px;
+}
+
+.bar-item {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.bar-track {
+  height: 10px;
+  background: #eef2ea;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand), var(--accent));
+}
+
+.table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-wrap {
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+}
+
+tbody tr:hover {
+  background: #f7faef;
+}
+
+#rowCount {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .grid-3,
+  .kpi-row,
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-top: 28px;
+  }
+
+  .bar-item {
+    grid-template-columns: 90px 1fr auto;
+  }
+}

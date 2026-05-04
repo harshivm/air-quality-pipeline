@@ -1,0 +1,123 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: aqp-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aqp}
+      POSTGRES_USER: ${POSTGRES_USER:-aqp_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aqp_pass}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aqp_user} -d ${POSTGRES_DB:-aqp}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  kafka:
+    image: apache/kafka:3.7.1
+    container_name: aqp-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  kafka-init:
+    image: apache/kafka:3.7.1
+    container_name: aqp-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-air_quality_raw}
+    command:
+      - /bin/bash
+      - -c
+      - |
+        /opt/kafka/bin/kafka-topics.sh \
+          --bootstrap-server kafka:9092 \
+          --create --if-not-exists \
+          --topic "$${KAFKA_TOPIC}" \
+          --partitions 1 --replication-factor 1
+
+  airflow:
+    build:
+      context: ./airflow
+    container_name: aqp-airflow
+    entrypoint: /bin/bash
+    user: "0:0"
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "true"
+      AIRFLOW_UID: "50000"
+      PYTHONPATH: /opt/airflow
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: ${KAFKA_TOPIC:-air_quality_raw}
+      DATASET_PATH: /opt/airflow/data/openaq.csv
+      STAGING_ROOT: /opt/airflow/staging
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://aqp_user:aqp_pass@db:5432/aqp}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./pipeline:/opt/airflow/pipeline
+      - ./data:/opt/airflow/data
+      - parquet_staging:/opt/airflow/staging
+    ports:
+      - "${AIRFLOW_PORT:-8080}:8080"
+    command: -lc "set -e; /home/airflow/.local/bin/airflow db init; /home/airflow/.local/bin/airflow users create --role Admin --username admin --password admin --firstname Admin --lastname User --email admin@example.com || true; /home/airflow/.local/bin/airflow scheduler & /home/airflow/.local/bin/airflow webserver"
+
+  app:
+    build:
+      context: .
+    container_name: aqp-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://aqp_user:aqp_pass@db:5432/aqp}
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    command: sh -c "python scripts/init_db.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  ingest:
+    build:
+      context: .
+    container_name: aqp-ingest
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://aqp_user:aqp_pass@db:5432/aqp}
+    command: sh -c "python scripts/init_db.py && python scripts/load_csv.py --path data/openaq.csv"
+    profiles: ["setup"]
+
+volumes:
+  pg_data:
+  kafka_data:
+  parquet_staging:

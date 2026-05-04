@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Air Quality Project Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="bg-shape bg-a"></div>
+  <div class="bg-shape bg-b"></div>
+
+  <header class="hero">
+    <p class="eyebrow">University Phase 1 · OpenAQ</p>
+    <h1>Global Air Quality Dashboard</h1>
+    <p class="subtitle">Interactive view of pollutant measurements loaded from your CSV dataset.</p>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls">
+      <h2>Filters</h2>
+      <div class="grid-3">
+        <label>
+          Pollutant
+          <select id="pollutantSelect">
+            <option value="">All pollutants</option>
+          </select>
+        </label>
+        <label>
+          Country code
+          <input id="countryInput" type="text" placeholder="e.g. BE" maxlength="8" />
+        </label>
+        <label>
+          City
+          <input id="cityInput" type="text" placeholder="e.g. Brussels" />
+        </label>
+      </div>
+      <div class="actions">
+        <button id="applyBtn">Apply Filters</button>
+        <button id="resetBtn" class="ghost">Reset</button>
+      </div>
+    </section>
+
+    <section class="kpi-row">
+      <article class="panel kpi">
+        <p>Total Records</p>
+        <h3 id="kpiRecords">-</h3>
+      </article>
+      <article class="panel kpi">
+        <p>Pollutant Types</p>
+        <h3 id="kpiPollutants">-</h3>
+      </article>
+      <article class="panel kpi">
+        <p>Countries</p>
+        <h3 id="kpiCountries">-</h3>
+      </article>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>Top Pollutants</h2>
+        <div id="pollutantBars" class="bars"></div>
+      </article>
+      <article class="panel">
+        <h2>Top Countries</h2>
+        <div id="countryBars" class="bars"></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="table-head">
+        <h2>Recent Measurements</h2>
+        <span id="rowCount">0 rows</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Country</th>
+              <th>City</th>
+              <th>Pollutant</th>
+              <th>Value</th>
+              <th>Unit</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
