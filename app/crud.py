@@ -4,6 +4,20 @@ from sqlalchemy.orm import Session
 from app.models import Measurement
 
 
+def _normalized_text(column, value: str | None, mode: str):
+    if not value:
+        return None
+
+    normalized_value = value.strip()
+    if not normalized_value:
+        return None
+
+    if mode == "city":
+        return func.lower(func.trim(column)) == normalized_value.lower()
+
+    return func.upper(func.trim(column)) == normalized_value.upper()
+
+
 def list_measurements(
     db: Session,
     pollutant: str | None = None,
@@ -15,11 +29,11 @@ def list_measurements(
     query = db.query(Measurement)
 
     if pollutant:
-        query = query.filter(Measurement.pollutant == pollutant)
+        query = query.filter(_normalized_text(Measurement.pollutant, pollutant, "pollutant"))
     if country_code:
-        query = query.filter(Measurement.country_code == country_code)
+        query = query.filter(_normalized_text(Measurement.country_code, country_code, "country_code"))
     if city:
-        query = query.filter(Measurement.city == city)
+        query = query.filter(_normalized_text(Measurement.city, city, "city"))
 
     return query.order_by(Measurement.last_updated.desc().nullslast()).offset(offset).limit(limit).all()
 

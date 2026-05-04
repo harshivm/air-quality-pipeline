@@ -19,7 +19,7 @@ def publish_csv_to_topic(path: str | None = None, topic: str | None = None) -> i
     )
 
     count = 0
-    with source.open("r", encoding="utf-8", newline="") as csv_file:
+    with source.open("r", encoding="utf-8-sig", newline="") as csv_file:
         reader = csv.DictReader(csv_file, delimiter=";")
         for row in reader:
             producer.send(topic or KAFKA_TOPIC, value=row)

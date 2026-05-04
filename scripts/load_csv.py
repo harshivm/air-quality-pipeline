@@ -71,7 +71,7 @@ def load_csv(path: str, chunk_size: int = 5000) -> int:
     total = 0
     batch: list[dict] = []
 
-    with open(path, "r", encoding="utf-8", newline="") as csv_file:
+    with open(path, "r", encoding="utf-8-sig", newline="") as csv_file:
         reader = csv.DictReader(csv_file, delimiter=";")
         with SessionLocal() as session:
             for row in reader:
